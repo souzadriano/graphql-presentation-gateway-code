@@ -5,9 +5,6 @@ const {
 	makeRemoteExecutableSchema,
 	introspectSchema,
 	mergeSchemas,
-	transformSchema,
-	RenameTypes,
-	RenameRootFields,
 } = require('graphql-tools');
 const fetch = require('node-fetch');
 const { HttpLink } = require('apollo-link-http');

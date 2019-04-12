@@ -1,4 +1,3 @@
-const { ApolloServer, gql } = require("apollo-server-express");
 const express = require("express");
 const app = express();
 
