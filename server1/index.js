@@ -1,5 +1,7 @@
 const { ApolloServer, gql } = require("apollo-server-express");
+const { buildFederatedSchema } = require("@apollo/federation");
 const express = require("express");
+
 const app = express();
 
 const users = [
@@ -16,12 +18,12 @@ const users = [
 ];
 
 const typeDefs = gql`
-  type User {
+  type User @key(fields: "id") {
     id: ID!
     name: String!
     age: Int
   }
-  type Query {
+  extend type Query {
     users: [User]
     user(id: ID!): User
   }
@@ -33,14 +35,23 @@ const resolvers = {
       return users;
     },
     user: (parent, { id }, context) => {
-      return users.find((user) => user.id == id);
+      return users.find(user => user.id == id);
     },
-  },
+    User: {
+      __resolveReference(object) {
+        return users.find(user => user.id === object.id);
+      }
+    }
+  }
 };
 
 const server = new ApolloServer({
-  typeDefs,
-  resolvers,
+  schema: buildFederatedSchema([
+    {
+      typeDefs,
+      resolvers
+    }
+  ]),
   introspection: true
 });
 
