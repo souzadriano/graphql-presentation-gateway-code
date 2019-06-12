@@ -13,14 +13,24 @@ const { RESTDataSource } = require('apollo-datasource-rest');
 const app = express();
 
 const makeMergedSchema = async () => {
-	const UserLink = new HttpLink({
-		uri: 'http://localhost:4001/graphql',
-		fetch,
-	});
-	const UserSchema = makeRemoteExecutableSchema({
-		schema: await introspectSchema(UserLink),
-		link: UserLink,
-	});
+    let UserSchema;
+
+    try {
+        const UserLink = new HttpLink({
+            uri: 'http://localhost:4001/graphql',
+            fetch,
+        });
+        UserSchema = makeRemoteExecutableSchema({
+            schema: await introspectSchema(UserLink),
+            link: UserLink,
+        });
+    } catch(e) {
+        UserSchema = gql`
+            type User {
+                id: ID!
+            }
+        `
+    }
 
 	const MessageLink = new HttpLink({
 		uri: 'http://localhost:4002/graphql',
@@ -55,13 +65,13 @@ const makeMergedSchema = async () => {
 		schemas: [UserSchema, MessageSchema, LinkSchema],
 		resolvers: {
 			Message: {
-				user: async (parent, args, context, info) => {
+				user: async (message, args, context, info) => {
                     return await info.mergeInfo.delegateToSchema({
                         schema: UserSchema,
                         operation: 'query',
                         fieldName: 'user',
                         args: {
-                            id: parent.userId,
+                            id: message.userId,
                         },
                         context,
                         info,
@@ -69,13 +79,13 @@ const makeMergedSchema = async () => {
 				},
 			},
 			User: {
-				messages: async (parent, args, context, info) => {
+				messages: async (user, args, context, info) => {
                     const messages = await info.mergeInfo.delegateToSchema({
                         schema: MessageSchema,
                         operation: 'query',
                         fieldName: 'messagesByUser',
                         args: {
-                            userId: parent.id,
+                            userId: user.id,
                         },
                         context,
                         info,
