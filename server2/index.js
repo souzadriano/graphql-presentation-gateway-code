@@ -57,17 +57,19 @@ const resolvers = {
     },
     messagesByUser: async (parent, { userId }, context) => {
       return messages.filter(message => message.userId == userId);
-    },
-    Message: {
-      user: async (message, args, context) => {
-        return { __typename: "User", id: message.userId };
-      }
-    },
-    User: {
-      messages: async (user, args, context) => {
-        console.log(user);
-        messages.filter(message => message.userId == user.id);
-      }
+    }
+  },
+  Message: {
+    user: async (message, args, context) => {
+      return { __typename: "User", id: message.userId };
+    }
+  },
+  User: {
+    messages: async (user, args, context) => {
+      console.log(user);
+      return messages.filter(
+        message => message.userId == parseInt(user.id, 10)
+      );
     }
   }
 };

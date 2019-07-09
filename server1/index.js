@@ -36,11 +36,12 @@ const resolvers = {
     },
     user: (parent, { id }, context) => {
       return users.find(user => user.id == id);
-    },
-    User: {
-      __resolveReference(object) {
-        return users.find(user => user.id === object.id);
-      }
+    }
+  },
+  User: {
+    __resolveReference(object) {
+      console.log(object);
+      return users.find(user => user.id === parseInt(object.id, 10));
     }
   }
 };
