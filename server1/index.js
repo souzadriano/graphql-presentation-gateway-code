@@ -1,6 +1,7 @@
 const { ApolloServer, gql } = require("apollo-server-express");
 const { buildFederatedSchema } = require("@apollo/federation");
 const express = require("express");
+const DataLoader = require("dataloader");
 
 const app = express();
 
@@ -39,11 +40,19 @@ const resolvers = {
     }
   },
   User: {
-    __resolveReference(object) {
-      console.log(object);
-      return users.find(user => user.id === parseInt(object.id, 10));
-    }
+    __resolveReference: async (reference, { loaders }) =>
+      loaders.users.load(parseInt(reference.id, 10))
   }
+};
+
+const getUsers = ids => {
+  return Promise.resolve(users.filter(user => ids.indexOf(user.id) > -1));
+};
+
+const createLoaders = () => {
+  return {
+    users: new DataLoader(ids => getUsers(ids))
+  };
 };
 
 const server = new ApolloServer({
@@ -53,7 +62,10 @@ const server = new ApolloServer({
       resolvers
     }
   ]),
-  introspection: true
+  introspection: true,
+  context: async ({ req }) => {
+    return { loaders: createLoaders() };
+  }
 });
 
 server.applyMiddleware({ app });

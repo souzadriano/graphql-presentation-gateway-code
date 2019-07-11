@@ -1,6 +1,7 @@
 const { ApolloServer, gql } = require("apollo-server-express");
 const { buildFederatedSchema } = require("@apollo/federation");
 const express = require("express");
+const { createBatchResolver } = require("graphql-resolve-batch");
 
 const messages = [
   {
@@ -65,15 +66,13 @@ const resolvers = {
     }
   },
   User: {
-    messages: async (user, args, context) => {
-      console.log(user);
-      return messages.filter(
-        message => message.userId == parseInt(user.id, 10)
+    messages: createBatchResolver(async (users, args, context) => {
+      return users.map(user =>
+        messages.filter(message => message.userId == parseInt(user.id, 10))
       );
-    }
+    })
   }
 };
-
 const server = new ApolloServer({
   schema: buildFederatedSchema([
     {
