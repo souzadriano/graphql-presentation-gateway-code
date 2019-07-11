@@ -5,7 +5,8 @@ const express = require("express");
 const gateway = new ApolloGateway({
   serviceList: [
     { name: "users", url: "http://localhost:4001/graphql" },
-    { name: "messages", url: "http://localhost:4002/graphql" }
+    { name: "messages", url: "http://localhost:4002/graphql" },
+    { name: "chars", url: "http://localhost:4004/graphql" }
   ]
 });
 
