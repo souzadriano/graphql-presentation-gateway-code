@@ -11,7 +11,7 @@
 		"apollo-link-http": "^1.5.14",
 		"apollo-server": "^2.4.8",
 		"apollo-server-express": "^2.4.8",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "graphql": "^14.2.0",
 		"graphql-iso-date": "^3.6.1",
 		"graphql-resolve-batch": "^1.0.2",
